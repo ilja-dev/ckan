@@ -1327,19 +1327,21 @@ def user_show(context, data_dict):
         revisions_list.append(revision_dict)
     user_dict['activity'] = revisions_list
 
-    user_dict['datasets'] = []
-    dataset_q = (model.Session.query(model.Package)
-                 .join(model.PackageRole)
-                 .filter_by(user=user_obj, role=model.Role.ADMIN)
-                 .limit(50))
+    if data_dict.get('include_datasets', False):
+        user_dict['datasets'] = []
+        dataset_q = (model.Session.query(model.Package)
+                     .join(model.PackageRole)
+                     .filter_by(user=user_obj, role=model.Role.ADMIN)
+                     .limit(50))
 
-    for dataset in dataset_q:
-        try:
-            dataset_dict = logic.get_action('package_show')(
-                context, {'id': dataset.id})
-        except logic.NotAuthorized:
-            continue
-        user_dict['datasets'].append(dataset_dict)
+        for dataset in dataset_q:
+            try:
+                dataset_dict = logic.get_action('package_show')(
+                    context, {'id': dataset.id})
+                del context['package']
+            except logic.NotAuthorized:
+                continue
+            user_dict['datasets'].append(dataset_dict)
 
     user_dict['num_followers'] = logic.get_action('user_follower_count')(
         {'model': model, 'session': model.Session},

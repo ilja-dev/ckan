@@ -400,7 +400,7 @@ class TestAction(WsgiAppCase):
         assert 'id' in edit
 
     def test_05b_user_show_datasets(self):
-        postparams = '%s=1' % json.dumps({'id':'annafan'})
+        postparams = '%s=1' % json.dumps({'id':'annafan', 'include_datasets': True})
         res = self.app.post('/api/action/user_show', params=postparams)
         res_obj = json.loads(res.body)
         result = res_obj['result']
